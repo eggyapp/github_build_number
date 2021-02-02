@@ -45,6 +45,11 @@ Future<void> main(List<String> arguments) async {
 
   final program = arguments.first;
   final workingDir = arguments.parse('workingDir');
+  final verbose = arguments.contains('-v');
+
+  if (verbose) {
+    stdout.writeln("-> Running program '$program' in workingDir '${workingDir ?? '.'}'");
+  }
 
   // check if an api key is provided and if so lookup build number from remote
   // so we don't need to pass in a bunch of args
@@ -62,18 +67,33 @@ Future<void> main(List<String> arguments) async {
     case buildNumberProgram:
       final gitObject = await currentBranch(workingDir: workingDir);
       final token = arguments.parse('token');
+      if (verbose) {
+        stdout.writeln('-> gitObject = $gitObject');
+        stdout.writeln('-> token = $token');
+      }
 
-      if (token != null && token.isNotEmpty) {
+      if (token != null && token.trim().isNotEmpty) {
+        if (verbose) {
+          stdout.writeln('-> token found, fetching build number from github api');
+        }
+
         try {
           // gives us the details we need for the api call
           final remote = await githubPath(
             workingDir: workingDir,
           ).then((it) => it.split('/'));
 
+          final owner = remote.first;
+          final repo = remote.last;
+          if (verbose) {
+            stdout.writeln('-> owner = $owner');
+            stdout.writeln('-> repo = $repo');
+          }
+
           final bn = await fetchCommitCount(
             token: token,
-            owner: remote.first,
-            repo: remote.last,
+            owner: owner,
+            repo: repo,
             gitObject: gitObject,
           );
           stdout.writeln(bn);
@@ -82,6 +102,10 @@ Future<void> main(List<String> arguments) async {
           exit(1);
         }
       } else {
+        if (verbose) {
+          stdout.writeln('-> no token found, calculating build number from local git history');
+        }
+
         try {
           final bn = await localBuildNumber(
             gitObject: gitObject,
