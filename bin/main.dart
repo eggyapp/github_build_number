@@ -39,6 +39,8 @@ Future<void> main(List<String> arguments) async {
     
     token='<github api token>'
     
+    Token can also be set via the environment variable: GITHUB_API_TOKEN
+    
     '''));
     exit(1);
   }
@@ -66,7 +68,7 @@ Future<void> main(List<String> arguments) async {
       break;
     case buildNumberProgram:
       final gitObject = await currentBranch(workingDir: workingDir);
-      final token = arguments.parse('token');
+      final token = arguments.parse('token') ?? Platform.environment['GITHUB_API_TOKEN'];
       if (verbose) {
         stdout.writeln('-> gitObject = $gitObject');
         stdout.writeln('-> token = $token');
