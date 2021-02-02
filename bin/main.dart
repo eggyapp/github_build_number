@@ -70,13 +70,13 @@ Future<void> main(List<String> arguments) async {
       final gitObject = await currentBranch(workingDir: workingDir);
       final token = arguments.parse('token') ?? Platform.environment['GITHUB_API_TOKEN'];
       if (verbose) {
-        stdout.writeln('-> gitObject = $gitObject');
-        stdout.writeln('-> token = $token');
+        stderr.writeln('-> gitObject = $gitObject');
+        stderr.writeln('-> token = $token');
       }
 
       if (token != null && token.trim().isNotEmpty) {
         if (verbose) {
-          stdout.writeln('-> token found, fetching build number from github api');
+          stderr.writeln('-> token found, fetching build number from github api');
         }
 
         try {
@@ -88,8 +88,8 @@ Future<void> main(List<String> arguments) async {
           final owner = remote.first;
           final repo = remote.last;
           if (verbose) {
-            stdout.writeln('-> owner = $owner');
-            stdout.writeln('-> repo = $repo');
+            stderr.writeln('-> owner = $owner');
+            stderr.writeln('-> repo = $repo');
           }
 
           final bn = await fetchCommitCount(
@@ -105,7 +105,7 @@ Future<void> main(List<String> arguments) async {
         }
       } else {
         if (verbose) {
-          stdout.writeln('-> no token found, calculating build number from local git history');
+          stderr.writeln('-> no token found, calculating build number from local git history');
         }
 
         try {
