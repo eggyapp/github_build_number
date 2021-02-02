@@ -50,7 +50,7 @@ Future<void> main(List<String> arguments) async {
   final verbose = arguments.contains('-v');
 
   if (verbose) {
-    stdout.writeln("-> Running program '$program' in workingDir '${workingDir ?? '.'}'");
+    stderr.writeln("-> Running program '$program' in workingDir '${workingDir ?? '.'}'");
   }
 
   // check if an api key is provided and if so lookup build number from remote
