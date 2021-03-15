@@ -1,5 +1,13 @@
-A sample command-line application with an entrypoint in `bin/`, library code
-in `lib/`, and example unit test in `test/`.
+Usage
+---
+When compiled as a self-contained executable run the following command for usage instructions:
+```shell
+./versioning 
+```
 
-Created from templates made available by Stagehand under a BSD-style
-[license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
+Building
+---
+From the project root run:
+```shell
+mkdir build && dart compile exe -o build/versioning bin/main.dart
+```
