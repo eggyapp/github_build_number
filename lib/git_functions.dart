@@ -1,12 +1,10 @@
 
 import 'dart:io';
 
-import 'package:meta/meta.dart';
-
 Future<int> localBuildNumber({
   /// e.g. branch, tag, HEAD
-  @required final String gitObject,
-  final String workingDir,
+  required final String gitObject,
+  final String? workingDir,
 }) async {
   final result = await Process.run(
     'git',
@@ -27,7 +25,7 @@ Future<int> localBuildNumber({
 }
 
 Future<String> versionName({
-  final String workingDir,
+  final String? workingDir,
 }) async {
   final result = await Process.run(
     'git',
@@ -44,7 +42,7 @@ Future<String> versionName({
 /// returns '<username>/<repo>'
 /// e.g. 'eggyapp/eggy-flutter'
 Future<String> githubPath({
-  final String workingDir,
+  final String? workingDir,
 }) async {
   final result = await Process.run(
     'git',
@@ -56,7 +54,7 @@ Future<String> githubPath({
     workingDirectory: workingDir,
   );
 
-  final url = result.stdout?.toString()?.trim() ?? '';
+  final url = result.stdout?.toString().trim() ?? '';
   if (url.isEmpty) {
     throw 'No remote found at path ${workingDir ?? '.'}';
   }
@@ -85,7 +83,7 @@ String parseGithubUrl(String url) {
 
 // returns the current branch name or an empty string
 Future<String> currentBranch({
-  final String workingDir,
+  final String? workingDir,
 }) async {
   final result = await Process.run(
     'git',
@@ -96,5 +94,5 @@ Future<String> currentBranch({
     workingDirectory: workingDir,
   );
 
-  return result.stdout?.toString()?.trim() ?? '';
+  return result.stdout?.toString().trim() ?? '';
 }

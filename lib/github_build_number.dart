@@ -1,11 +1,10 @@
 import 'package:graphql/client.dart';
-import 'package:meta/meta.dart';
 
 Future<int> fetchCommitCount({
-  @required final String token,
-  @required final String owner,
-  @required final String repo,
-  @required final String gitObject,
+  required final String token,
+  required final String owner,
+  required final String repo,
+  required final String gitObject,
 }) async {
   // print('test');
   final httpLink = HttpLink(
@@ -43,13 +42,14 @@ Future<int> fetchCommitCount({
     }
   }
 }
-'''
+''',
     ),
   );
 
   final result = await client.query(options);
-  if (result.hasException) {
-    throw result.exception;
+  final exception = result.exception;
+  if (exception != null) {
+    throw exception;
   } else {
     /// example return object
     /// {
@@ -71,6 +71,6 @@ Future<int> fetchCommitCount({
     //       }
     //     }
     //   }
-    return result.data['repository']['refs']['edges'].firstWhere((it) => it['node']['name'] == gitObject)['node']['target']['history']['totalCount'];
+    return result.data!['repository']['refs']['edges'].firstWhere((it) => it['node']['name'] == gitObject)['node']['target']['history']['totalCount'] as int;
   }
 }

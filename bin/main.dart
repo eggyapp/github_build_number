@@ -3,14 +3,13 @@ import 'package:github_build_number/git_functions.dart';
 import 'package:github_build_number/github_build_number.dart';
 
 extension ParseArgs on Iterable<String> {
-  String parse(final String argName, {bool required = false}) {
-    final arg = firstWhere((it) => it?.startsWith(argName), orElse: () => null)
-        ?.split('=')
-        ?.last;
-
-    if (arg == null && required) {
-      throw 'ERROR: missing required argument: $argName';
-    }
+  String parse(
+    final String argName, {
+    required String Function() orElse,
+  }) {
+    final arg = firstWhere((it) => it.startsWith(argName), orElse: orElse)
+        .split('=')
+        .last;
 
     return arg;
   }
@@ -21,36 +20,40 @@ Future<void> main(List<String> arguments) async {
   const buildNumberProgram = 'build-number';
 
   if (arguments.isEmpty) {
-    stderr.writeln(('''
-    Program is required
-    ===
-    $versionNameProgram
-    ---
-    Outputs the version name based on the most recent tag.
-    
-    
-    $buildNumberProgram
-    ---
-    Outputs the build number based on the number of accessible commits from the 
-    current branch.
-    
-    If a github api token is provided the build number will be fetched from github, this is
-    useful to ensure the correct build number on CI machines that perform shallow clones.
-    
-    token='<github api token>'
-    
-    Token can also be set via the environment variable: GITHUB_API_TOKEN
-    
-    '''));
+    stderr.writeln(
+      '''
+Program is required
+===
+$versionNameProgram
+---
+Outputs the version name based on the most recent tag.
+
+
+$buildNumberProgram
+---
+Outputs the build number based on the number of accessible commits from the 
+current branch.
+
+If a github api token is provided the build number will be fetched from github, this is
+useful to ensure the correct build number on CI machines that perform shallow clones.
+
+token='<github api token>'
+
+Token can also be set via the environment variable: GITHUB_API_TOKEN
+
+''',);
     exit(1);
   }
 
   final program = arguments.first;
-  final workingDir = arguments.parse('workingDir');
+  final workingDir = arguments.parse(
+    'workingDir',
+    orElse: () => Directory.current.path,
+  );
   final verbose = arguments.contains('-v');
 
   if (verbose) {
-    stderr.writeln("-> Running program '$program' in workingDir '${workingDir ?? '.'}'");
+    stderr.writeln("-> Running program '$program' in workingDir '$workingDir'");
   }
 
   // check if an api key is provided and if so lookup build number from remote
@@ -65,16 +68,18 @@ Future<void> main(List<String> arguments) async {
       );
       stdout.writeln(vn);
       exit(0);
-      break;
     case buildNumberProgram:
       final gitObject = await currentBranch(workingDir: workingDir);
-      final token = arguments.parse('token') ?? Platform.environment['GITHUB_API_TOKEN'];
+      final token = arguments.parse(
+        'token',
+        orElse: () => Platform.environment['GITHUB_API_TOKEN'] ?? '',
+      );
       if (verbose) {
         stderr.writeln('-> gitObject = $gitObject');
         stderr.writeln('-> token = $token');
       }
 
-      if (token != null && token.trim().isNotEmpty) {
+      if (token.trim().isNotEmpty) {
         if (verbose) {
           stderr.writeln('-> token found, fetching build number from github api');
         }
@@ -99,8 +104,8 @@ Future<void> main(List<String> arguments) async {
             gitObject: gitObject,
           );
           stdout.writeln(bn);
-        } catch (e, s) {
-          stderr.writeln('fetching commit count failed with error: "${e?.toString()}"');
+        } catch (e) {
+          stderr.writeln('fetching commit count failed with error: "${e.toString()}"');
           exit(1);
         }
       } else {
@@ -120,6 +125,5 @@ Future<void> main(List<String> arguments) async {
         }
       }
       exit(0);
-      break;
   }
 }
